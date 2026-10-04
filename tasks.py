@@ -8,160 +8,182 @@ from agents import (
 )
 
 
-def create_tasks(topic: str):
+def create_tasks(topic):
 
-    # -----------------------------
-    # Research Task
-    # -----------------------------
+    # ========================================================
+    # TASK 1 — RESEARCH
+    # ========================================================
+
     research_task = Task(
+
         description=f"""
         Research the following topic:
 
         {topic}
 
-        Use the web search tool extensively.
+        Find accurate and recent information.
 
-        Find:
-        1. Important background information
-        2. Current developments
-        3. Important facts and statistics
-        4. Different perspectives
-        5. Relevant organizations, studies, or credible sources
+        Focus on:
+        - Important facts
+        - Key concepts
+        - Current developments
+        - Statistics where available
+        - Advantages and disadvantages
+        - Important examples
+        - Reliable sources
 
-        Prefer recent and authoritative sources.
+        Use the web search tool.
 
-        Return structured research findings with source names
-        and URLs where available.
+        Clearly identify useful sources.
         """,
+
         expected_output="""
-        A structured research brief containing:
+        A detailed research summary containing:
         - Key findings
         - Important facts
         - Evidence
         - Source names
-        - Source URLs
+        - Source URLs where available
         """,
+
         agent=researcher,
     )
 
-    # -----------------------------
-    # Analysis Task
-    # -----------------------------
+
+    # ========================================================
+    # TASK 2 — ANALYSIS
+    # ========================================================
+
     analysis_task = Task(
+
         description=f"""
-        Analyze the research findings about:
+        Analyze the research collected about:
 
         {topic}
 
         Identify:
-        - Major trends
-        - Important relationships
-        - Advantages and disadvantages
-        - Key implications
-        - Numerical insights where relevant
 
-        Use the calculator tool whenever a numerical calculation
-        is actually required.
+        - Major findings
+        - Important patterns
+        - Comparisons
+        - Benefits
+        - Limitations
+        - Practical implications
+        - Numerical insights where applicable
 
-        Do not invent data.
+        Use the calculator tool when mathematical calculations
+        are required.
+
+        Do not invent information.
         """,
+
         expected_output="""
-        A clear analytical summary containing:
+        A structured analytical summary containing:
         - Major insights
         - Comparisons
-        - Trends
-        - Implications
-        - Any useful calculations
+        - Calculations if required
+        - Practical conclusions
         """,
+
         agent=analyst,
+
         context=[research_task],
     )
 
-    # -----------------------------
-    # Fact Check Task
-    # -----------------------------
+
+    # ========================================================
+    # TASK 3 — FACT CHECKING
+    # ========================================================
+
     fact_check_task = Task(
+
         description=f"""
         Fact-check the research and analysis about:
 
         {topic}
 
-        Use the web search tool to independently verify
-        the most important factual claims.
+        Verify important claims using reliable web sources.
 
-        Pay special attention to:
-        - Numbers
-        - Dates
-        - Statistics
-        - Technical claims
-        - Current information
+        Identify:
 
-        Identify claims that are strongly supported and claims
-        that should be treated cautiously.
+        - Correct claims
+        - Incorrect claims
+        - Outdated information
+        - Weakly supported claims
+        - Claims that require caution
+
+        Use the web search tool.
+
+        Do not introduce unsupported information.
         """,
+
         expected_output="""
         A fact-checking report containing:
         - Verified claims
-        - Claims needing caution
-        - Corrections if necessary
-        - Supporting source names and URLs
+        - Questionable claims
+        - Corrections
+        - Supporting sources
         """,
+
         agent=fact_checker,
-        context=[research_task, analysis_task],
+
+        context=[
+            research_task,
+            analysis_task
+        ],
     )
 
-    # -----------------------------
-    # Writing Task
-    # -----------------------------
+
+    # ========================================================
+    # TASK 4 — WRITING
+    # ========================================================
+
     writing_task = Task(
+
         description=f"""
         Write the final research report about:
 
         {topic}
 
-        Use ONLY the research, analysis, and fact-checking information
-        provided by the previous agents.
+        Use the research, analysis and fact-checking results.
 
-        Structure the report as:
+        The report should contain:
 
-        # Research Report
+        1. Executive Summary
+        2. Introduction
+        3. Key Findings
+        4. Detailed Analysis
+        5. Advantages
+        6. Limitations
+        7. Practical Applications
+        8. Conclusion
+        9. Sources
 
-        ## Executive Summary
+        Write in professional but easy-to-understand English.
 
-        ## Introduction
+        Do not invent facts.
 
-        ## Key Findings
-
-        ## Detailed Analysis
-
-        ## Fact-Checked Evidence
-
-        ## Challenges and Limitations
-
-        ## Conclusion
-
-        ## Sources
-
-        Write professionally and clearly.
-
-        Do not invent references, statistics, quotations, or facts.
-        Preserve source URLs supplied by previous agents.
+        Clearly distinguish verified information from
+        uncertain information.
         """,
+
         expected_output="""
-        A polished Markdown research report with clear headings,
-        concise paragraphs, useful bullet points, and a Sources section.
+        A complete professional research report in Markdown format.
         """,
+
         agent=writer,
+
         context=[
             research_task,
             analysis_task,
-            fact_check_task,
+            fact_check_task
         ],
     )
+
 
     return [
         research_task,
         analysis_task,
         fact_check_task,
-        writing_task,
+        writing_task
     ]
