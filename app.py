@@ -1,528 +1,191 @@
-import streamlit as st
+import os
 
-from crew import run_research
+from crewai import Agent, LLM
 
-
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-
-st.set_page_config(
-    page_title="ResearchFlow AI",
-    page_icon="🧠",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+from tools import web_search_tool, calculator_tool
 
 
 # ============================================================
-# CUSTOM CSS
+# GROQ API KEY
 # ============================================================
 
-st.html(
-    """
-    <style>
-
-    /* Main page */
-    .stApp {
-        background: #0b1020;
-    }
-
-    /* Hero section */
-    .hero-box {
-        background: linear-gradient(
-            135deg,
-            #111827 0%,
-            #172554 100%
-        );
-
-        border: 1px solid #263b63;
-        border-radius: 24px;
-
-        padding: 35px 40px;
-        margin-bottom: 25px;
-
-        box-shadow: 0 10px 35px rgba(0,0,0,0.25);
-    }
-
-    .hero-title {
-        font-size: 42px;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 8px;
-    }
-
-    .hero-subtitle {
-        font-size: 17px;
-        color: #b8c4d9;
-        line-height: 1.6;
-    }
-
-    .hero-badge {
-        display: inline-block;
-
-        margin-top: 18px;
-
-        padding: 7px 14px;
-
-        border-radius: 20px;
-
-        background: rgba(59,130,246,0.15);
-
-        border: 1px solid rgba(96,165,250,0.35);
-
-        color: #93c5fd;
-
-        font-size: 13px;
-
-        font-weight: 600;
-    }
-
-
-    /* Agent cards */
-    .agent-card {
-        background: #111827;
-
-        border: 1px solid #26324a;
-
-        border-radius: 18px;
-
-        padding: 22px 15px;
-
-        min-height: 150px;
-
-        text-align: center;
-
-        box-shadow: 0 8px 25px rgba(0,0,0,0.18);
-    }
-
-    .agent-icon {
-        font-size: 34px;
-        margin-bottom: 8px;
-    }
-
-    .agent-name {
-        color: white;
-
-        font-size: 17px;
-
-        font-weight: 700;
-
-        margin-bottom: 7px;
-    }
-
-    .agent-description {
-        color: #9ca3af;
-
-        font-size: 13px;
-
-        line-height: 1.5;
-    }
-
-
-    /* Section headings */
-    .section-heading {
-        color: white;
-
-        font-size: 25px;
-
-        font-weight: 750;
-
-        margin-top: 25px;
-
-        margin-bottom: 15px;
-    }
-
-
-    /* Pipeline arrow */
-    .pipeline-arrow {
-        text-align: center;
-
-        color: #64748b;
-
-        font-size: 24px;
-
-        padding-top: 55px;
-    }
-
-
-    /* Research info box */
-    .info-box {
-        background: #111827;
-
-        border: 1px solid #26324a;
-
-        border-radius: 16px;
-
-        padding: 18px;
-
-        color: #cbd5e1;
-
-        line-height: 1.6;
-
-        margin-top: 20px;
-    }
-
-    </style>
-    """
-)
-
-
-# ============================================================
-# HERO
-# ============================================================
-
-st.html(
-    """
-    <div class="hero-box">
-
-        <div class="hero-title">
-            🧠 ResearchFlow AI
-        </div>
-
-        <div class="hero-subtitle">
-            A Multi-Agent AI Research Team that researches,
-            analyzes, verifies, and writes your final report.
-        </div>
-
-        <div class="hero-badge">
-            ⚡ CrewAI &nbsp;•&nbsp; Groq &nbsp;•&nbsp; Multi-Agent AI
-        </div>
-
-    </div>
-    """
-)
-
-
-# ============================================================
-# AGENT TEAM
-# ============================================================
-
-st.markdown(
-    '<div class="section-heading">🤖 AI Research Team</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# AGENT CARDS
-# ============================================================
-
-col1, arrow1, col2, arrow2, col3, arrow3, col4 = st.columns(
-    [2.2, 0.35, 2.2, 0.35, 2.2, 0.35, 2.2]
-)
-
-
-# ------------------------------------------------------------
-# Researcher
-# ------------------------------------------------------------
-
-with col1:
-
-    st.html(
-        """
-        <div class="agent-card">
-
-            <div class="agent-icon">
-                🔎
-            </div>
-
-            <div class="agent-name">
-                Researcher
-            </div>
-
-            <div class="agent-description">
-                Searches the web and collects
-                reliable research evidence.
-            </div>
-
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Arrow
-# ------------------------------------------------------------
-
-with arrow1:
-
-    st.html(
-        """
-        <div class="pipeline-arrow">
-            →
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Analyst
-# ------------------------------------------------------------
-
-with col2:
-
-    st.html(
-        """
-        <div class="agent-card">
-
-            <div class="agent-icon">
-                📊
-            </div>
-
-            <div class="agent-name">
-                Analyst
-            </div>
-
-            <div class="agent-description">
-                Analyzes findings, comparisons
-                and numerical information.
-            </div>
-
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Arrow
-# ------------------------------------------------------------
-
-with arrow2:
-
-    st.html(
-        """
-        <div class="pipeline-arrow">
-            →
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Fact Checker
-# ------------------------------------------------------------
-
-with col3:
-
-    st.html(
-        """
-        <div class="agent-card">
-
-            <div class="agent-icon">
-                🔍
-            </div>
-
-            <div class="agent-name">
-                Fact Checker
-            </div>
-
-            <div class="agent-description">
-                Verifies important claims
-                and identifies weak evidence.
-            </div>
-
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Arrow
-# ------------------------------------------------------------
-
-with arrow3:
-
-    st.html(
-        """
-        <div class="pipeline-arrow">
-            →
-        </div>
-        """
-    )
-
-
-# ------------------------------------------------------------
-# Writer
-# ------------------------------------------------------------
-
-with col4:
-
-    st.html(
-        """
-        <div class="agent-card">
-
-            <div class="agent-icon">
-                ✍️
-            </div>
-
-            <div class="agent-name">
-                Writer
-            </div>
-
-            <div class="agent-description">
-                Converts everything into
-                a professional research report.
-            </div>
-
-        </div>
-        """
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    raise ValueError(
+        "GROQ_API_KEY is missing. "
+        "Please add it to Streamlit Secrets."
     )
 
 
 # ============================================================
-# RESEARCH INPUT
+# GROQ LLM
 # ============================================================
 
-st.markdown(
-    '<div class="section-heading">🔬 What do you want to research?</div>',
-    unsafe_allow_html=True
-)
-
-
-topic = st.text_area(
-    label="Research topic",
-    placeholder=(
-        "Example:\n"
-        "How can artificial intelligence improve "
-        "renewable energy integration in modern power systems?"
-    ),
-    height=130,
-    label_visibility="collapsed",
+llm = LLM(
+    model="groq/qwen/qwen3.8-27b",
+    api_key=GROQ_API_KEY,
+    temperature=0.2,
 )
 
 
 # ============================================================
-# QUICK EXAMPLES
+# 1. RESEARCHER
 # ============================================================
 
-st.caption(
-    "💡 Example topics: AI in power systems • EV smart charging • "
-    "Renewable energy • Battery technology • Agentic AI"
+researcher = Agent(
+
+    role="Senior Researcher",
+
+    goal="""
+    Research the user's topic using reliable and recent
+    web sources.
+
+    Collect:
+    - Important facts
+    - Evidence
+    - Statistics
+    - Recent developments
+    - Relevant examples
+    - Source information
+
+    Always use the web search tool when research is required.
+    Do not invent sources.
+    """,
+
+    backstory="""
+    You are an experienced research specialist.
+
+    You carefully search the internet, compare information
+    from different sources and collect reliable evidence.
+
+    You never pretend to have accessed a webpage unless the
+    web search tool actually returned information about it.
+    """,
+
+    tools=[
+        web_search_tool
+    ],
+
+    llm=llm,
+
+    verbose=True,
+
+    allow_delegation=False,
 )
 
 
 # ============================================================
-# START BUTTON
+# 2. ANALYST
 # ============================================================
 
-start_button = st.button(
-    "🚀 Start AI Research",
-    type="primary",
-    use_container_width=True,
+analyst = Agent(
+
+    role="Research Analyst",
+
+    goal="""
+    Analyze the research findings and convert raw information
+    into useful insights.
+
+    Identify:
+    - Patterns
+    - Comparisons
+    - Advantages
+    - Limitations
+    - Practical implications
+    - Numerical insights
+    """,
+
+    backstory="""
+    You are a professional analytical researcher.
+
+    You carefully examine research findings and produce
+    logical conclusions.
+
+    When mathematical calculations are required, use the
+    calculator tool.
+    """,
+
+    tools=[
+        calculator_tool
+    ],
+
+    llm=llm,
+
+    verbose=True,
+
+    allow_delegation=False,
 )
 
 
 # ============================================================
-# RUN RESEARCH
+# 3. FACT CHECKER
 # ============================================================
 
-if start_button:
+fact_checker = Agent(
 
-    if not topic.strip():
+    role="Fact Checking Specialist",
 
-        st.warning(
-            "⚠️ Please enter a research topic first."
-        )
+    goal="""
+    Verify important claims from the research.
 
-    else:
+    Check:
+    - Accuracy
+    - Reliability
+    - Current relevance
+    - Supporting evidence
+    - Potentially misleading claims
+    """,
 
-        st.divider()
+    backstory="""
+    You are a meticulous fact-checking specialist.
 
-        st.markdown(
-            '<div class="section-heading">⚙️ Research Progress</div>',
-            unsafe_allow_html=True
-        )
+    You independently verify important claims using the
+    available web search tool.
 
+    Clearly identify information that is verified,
+    questionable or unsupported.
+    """,
 
-        # ----------------------------------------------------
-        # Progress display
-        # ----------------------------------------------------
+    tools=[
+        web_search_tool
+    ],
 
-        with st.status(
-            "🧠 ResearchFlow AI is working...",
-            expanded=True
-        ) as progress:
+    llm=llm,
 
-            st.write(
-                "🔎 Researcher → Searching for information..."
-            )
+    verbose=True,
 
-            try:
-
-                result = run_research(topic)
-
-                st.write(
-                    "📊 Analyst → Analyzing findings..."
-                )
-
-                st.write(
-                    "🔍 Fact Checker → Verifying important claims..."
-                )
-
-                st.write(
-                    "✍️ Writer → Preparing final report..."
-                )
-
-                progress.update(
-                    label="✅ Research completed successfully!",
-                    state="complete",
-                    expanded=False,
-                )
-
-
-            except Exception as error:
-
-                progress.update(
-                    label="❌ Research failed",
-                    state="error",
-                    expanded=True,
-                )
-
-                st.error(
-                    "An error occurred while running the AI research team."
-                )
-
-                st.exception(error)
-
-                st.stop()
-
-
-        # ====================================================
-        # FINAL REPORT
-        # ====================================================
-
-        st.markdown(
-            '<div class="section-heading">📄 Final Research Report</div>',
-            unsafe_allow_html=True
-        )
-
-
-        st.markdown(
-            result
-        )
-
-
-        # ====================================================
-        # DOWNLOAD
-        # ====================================================
-
-        st.download_button(
-            label="⬇️ Download Research Report",
-            data=result,
-            file_name="research_report.md",
-            mime="text/markdown",
-            use_container_width=True,
-        )
+    allow_delegation=False,
+)
 
 
 # ============================================================
-# FOOTER
+# 4. WRITER
 # ============================================================
 
-st.divider()
+writer = Agent(
 
-st.caption(
-    "ResearchFlow AI • Multi-Agent Research System • "
-    "Built with CrewAI + Groq + Streamlit"
+    role="Senior Research Writer",
+
+    goal="""
+    Convert the research, analysis and fact-checking results
+    into a professional research report.
+    """,
+
+    backstory="""
+    You are an experienced technical writer.
+
+    You write clear, professional and logically structured
+    reports.
+
+    You must not invent facts, statistics or sources.
+    """,
+
+    tools=[],
+
+    llm=llm,
+
+    verbose=True,
+
+    allow_delegation=False,
 )
