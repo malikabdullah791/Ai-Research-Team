@@ -1,36 +1,57 @@
+import os
+
 from crewai_tools import SerperDevTool
 from crewai.tools import tool
 
 
-# -----------------------------
-# Web Search Tool
-# -----------------------------
-web_search_tool = SerperDevTool(
-    search_url="https://google.serper.dev/search",
-    n_results=5,
-)
+# ============================================================
+# WEB SEARCH TOOL
+# ============================================================
+
+if not os.getenv("SERPER_API_KEY"):
+    raise ValueError(
+        "SERPER_API_KEY is missing. Add it in Streamlit Secrets."
+    )
 
 
-# -----------------------------
-# Calculator Tool
-# -----------------------------
+web_search_tool = SerperDevTool()
+
+
+# ============================================================
+# CALCULATOR TOOL
+# ============================================================
+
 @tool("Research Calculator")
-def calculator(expression: str) -> str:
+def calculator_tool(expression: str) -> str:
     """
-    Calculate a basic mathematical expression.
+    Perform a basic mathematical calculation.
 
-    Use this tool when numerical calculations are required.
     Example:
-    125 * 0.85
+    25 * 4
+    100 / 5
+    (50 + 30) / 2
     """
 
-    allowed = set("0123456789+-*/().% ")
+    allowed_characters = set(
+        "0123456789+-*/().% "
+    )
 
-    if not expression or not set(expression) <= allowed:
-        return "Invalid mathematical expression."
+    if not expression:
+        return "No expression was provided."
+
+    if not set(expression) <= allowed_characters:
+        return "Invalid expression. Only basic mathematical operators are allowed."
 
     try:
-        result = eval(expression, {"__builtins__": {}}, {})
+
+        result = eval(
+            expression,
+            {"__builtins__": {}},
+            {}
+        )
+
         return f"Calculation result: {result}"
-    except Exception:
-        return "Could not calculate the expression."
+
+    except Exception as error:
+
+        return f"Calculation failed: {error}"
