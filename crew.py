@@ -12,50 +12,56 @@ from agents import (
 from tasks import create_tasks
 
 
-def run_research(topic: str, status_callback=None):
+def run_research(topic):
+
+    # ========================================================
+    # CHECK API KEYS
+    # ========================================================
 
     if not os.getenv("GROQ_API_KEY"):
         raise ValueError(
-            "GROQ_API_KEY is missing. Add it to Streamlit Secrets."
+            "GROQ_API_KEY is missing."
         )
 
     if not os.getenv("SERPER_API_KEY"):
         raise ValueError(
-            "SERPER_API_KEY is missing. Add it to Streamlit Secrets."
+            "SERPER_API_KEY is missing."
         )
+
+
+    # ========================================================
+    # CREATE TASKS
+    # ========================================================
 
     tasks = create_tasks(topic)
 
-    # -----------------------------
-    # Status updates
-    # -----------------------------
-    if status_callback:
-        status_callback("🔎 Researcher — searching the web...")
+
+    # ========================================================
+    # CREATE CREW
+    # ========================================================
 
     crew = Crew(
+
         agents=[
             researcher,
             analyst,
             fact_checker,
             writer,
         ],
+
         tasks=tasks,
+
         process=Process.sequential,
+
         verbose=True,
     )
 
-    # Note:
-    # CrewAI itself controls task execution.
-    # Streamlit receives the main status updates here.
-    if status_callback:
-        status_callback("📊 Analyst — analyzing research findings...")
+
+    # ========================================================
+    # RUN CREW
+    # ========================================================
 
     result = crew.kickoff()
 
-    if status_callback:
-        status_callback("🔍 Fact Checker — verifying important claims...")
-
-    if status_callback:
-        status_callback("✍️ Writer — preparing the final report...")
 
     return str(result)
